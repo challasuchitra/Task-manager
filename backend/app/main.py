@@ -21,10 +21,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# create tables
+
 models.Base.metadata.create_all(bind=engine)
 
-# ------------------ REGISTER ------------------
+
 @app.post("/register")
 def register(user: UserCreate, db: Session = Depends(get_db)):
     existing_user = db.query(models.User).filter(models.User.email == user.email).first()
@@ -44,7 +44,7 @@ def register(user: UserCreate, db: Session = Depends(get_db)):
     return {"message": "User registered successfully"}
 
 
-# ------------------ LOGIN ------------------
+
 @app.post("/login")
 def login(
     form_data: OAuth2PasswordRequestForm = Depends(),
@@ -63,7 +63,7 @@ def login(
     return {"access_token": token}
 
 
-# ------------------ TASK APIs ------------------
+
 
 @app.post("/tasks")
 def create_task(
