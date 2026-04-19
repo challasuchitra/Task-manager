@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Task Manager</title>
+</head>
+<body>
+
+<h2>Register</h2>
+<input id="reg_email" placeholder="Email">
+<input id="reg_password" placeholder="Password">
+<button onclick="register()">Register</button>
+
+<h2>Login</h2>
+<input id="login_email" placeholder="Email">
+<input id="login_password" placeholder="Password">
+<button onclick="login()">Login</button>
+
+<h2>Create Task</h2>
+<input id="task_title" placeholder="Task Title">
+<button onclick="createTask()">Add Task</button>
+
+<h2>Tasks</h2>
+<ul id="task_list"></ul>
+
+<script>
+let token = "";
+
+// ✅ REGISTER
+async function register() {
+    await fetch("http://127.0.0.1:8000/register", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+            email: reg_email.value,
+            password: reg_password.value
+        })
+    });
+    alert("Registered!");
+}
+
+// ✅ LOGIN
+async function login() {
+    const form = new URLSearchParams();
+    form.append("username", login_email.value);
+    form.append("password", login_password.value);
+
+    const res = await fetch("http://127.0.0.1:8000/login", {
+        method: "POST",
+        body: form
+    });
+
+    const data = await res.json();
+    token = data.access_token;
+    alert("Logged in!");
+    getTasks();
+}
+
+// ✅ CREATE TASK
+async function createTask() {
+    await fetch("http://127.0.0.1:8000/tasks", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + token
+        },
+        body: JSON.stringify({
+            title: task_title.value
+        })
+    });
+    getTasks();
+}
+
+// ✅ GET TASKS
+async function getTasks() {
+    const res = await fetch("http://127.0.0.1:8000/tasks", {
+        headers: {
+            "Authorization": "Bearer " + token
+        }
+    });
+
+    const tasks = await res.json();
+    task_list.innerHTML = "";
+
+    tasks.forEach(t => {
+        const li = document.createElement("li");
+
+        li.innerHTML = `
+            ${t.title} - ${t.completed ? "✅ Done" : "❌ Pending"}
+            <button onclick="completeTask(${t.id})">Complete</button>
+            <button onclick="deleteTask(${t.id})">Delete</button>
+        `;
+
+        task_list.appendChild(li);
+    });
+}
+
+// ✅ COMPLETE TASK
+async function completeTask(id) {
+    await fetch(`http://127.0.0.1:8000/tasks/${id}`, {
+        method: "PUT",
+        headers: {
+            "Authorization": "Bearer " + token
+        }
+    });
+    getTasks();
+}
+
+// ✅ DELETE TASK
+async function deleteTask(id) {
+    await fetch(`http://127.0.0.1:8000/tasks/${id}`, {
+        method: "DELETE",
+        headers: {
+            "Authorization": "Bearer " + token
+        }
+    });
+    getTasks();
+}
+</script>
+
+</body>
+</html>
