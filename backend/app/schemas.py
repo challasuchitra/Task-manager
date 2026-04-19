@@ -1,17 +1,17 @@
 from pydantic import BaseModel
 
-# 🔐 User Schema
+
 class UserCreate(BaseModel):
     email: str
     password: str
 
 
-# 📌 Task Create
+
 class TaskCreate(BaseModel):
     title: str
 
 
-# 📤 Task Response
+
 class TaskOut(BaseModel):
     id: int
     title: str
